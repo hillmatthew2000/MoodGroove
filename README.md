@@ -1,9 +1,9 @@
 # MoodGroove
 MoodGroove is a smart music app that curates and plays songs from your favorite genres based on your current mood, powered by the Spotify API.
 
-Authors:
-Fred Johnson @freddyj01
-Matthew Hill @hillmatthew2000
+Authors:  
+Fred Johnson [@freddyj01](https://github.com/freddyj01)  
+Matthew Hill [@hillmatthew2000](https://github.com/hillmatthew2000)
 
 🎵 What Is MoodGroove?
 MoodGroove lets your feelings guide the soundtrack of your day. Whether you’re excited, mellow, happy, or blue, just select (or let the app detect) your mood, and instantly get a playlist that matches your vibe and preferred genres. Music curation is seamless and personalized, drawing from Spotify’s massive song library.
