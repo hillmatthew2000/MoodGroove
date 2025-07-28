@@ -1,4 +1,4 @@
-#MoodGroove
+# MoodGroove
 MoodGroove is a smart music app that curates and plays songs from your favorite genres based on your current mood, powered by the Spotify API.
 
 🎵 What Is MoodGroove?
