@@ -1,5 +1,14 @@
-﻿@using MGBlazorApp.Shared
-@using MGBlazorApp.Components
+@using System.Net.Http
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
+@using Microsoft.JSInterop
+@using MGBlazorApp
+@using MGBlazorApp.Shared
+
 @inherits LayoutComponentBase
 
 <div class="page">
@@ -11,7 +20,7 @@
         <div class="top-row px-4 auth">
             <div class="app-title">
                 <h1>🎵 MoodGroove</h1>
-                <span class="subtitle">by Matthew Hill & Freddy Johnson</span>
+                <span class="subtitle">by @freddyj01 & @hillmatthew2000</span>
             </div>
             <LoginDisplay />
         </div>

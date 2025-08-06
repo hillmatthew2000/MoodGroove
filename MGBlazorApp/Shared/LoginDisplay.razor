@@ -1,0 +1,295 @@
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
+
+<div class="login-display">
+    @if (isLoggedIn)
+    {
+        <div class="user-info">
+            <div class="user-avatar">
+                @if (!string.IsNullOrEmpty(userProfileImage))
+                {
+                    <img src="@userProfileImage" alt="Profile" class="profile-image" />
+                }
+                else
+                {
+                    <div class="default-avatar">🎵</div>
+                }
+            </div>
+            <div class="user-details">
+                <span class="username">@userName</span>
+                <span class="spotify-status">Connected to Spotify</span>
+            </div>
+            <button class="btn btn-logout" @onclick="Logout" title="Logout">
+                <span class="bi bi-box-arrow-right"></span>
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="login-options">
+            <button class="btn btn-spotify" @onclick="LoginWithSpotify">
+                <span class="bi bi-spotify"></span>
+                Connect with Spotify
+            </button>
+            <button class="btn btn-guest" @onclick="ContinueAsGuest">
+                <span class="bi bi-person"></span>
+                Continue as Guest
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoggedIn = false;
+    private string userName = string.Empty;
+    private string userProfileImage = string.Empty;
+    private bool isGuest = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Check if user is already logged in (from localStorage or session)
+        await CheckLoginStatus();
+    }
+
+    private async Task LoginWithSpotify()
+    {
+        try
+        {
+            // TODO: Implement actual Spotify OAuth flow
+            // For now, simulate a successful login
+            await SimulateSpotifyLogin();
+        }
+        catch (Exception ex)
+        {
+            // Handle login error
+            Console.WriteLine($"Login error: {ex.Message}");
+        }
+    }
+
+    private async Task SimulateSpotifyLogin()
+    {
+        // Simulate Spotify login process
+        await Task.Delay(1000); // Simulate API call delay
+        
+        isLoggedIn = true;
+        userName = "Music Lover"; // This would come from Spotify API
+        userProfileImage = ""; // This would come from Spotify API
+        isGuest = false;
+        
+        // Store login state
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "moodgroove_logged_in", "true");
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "moodgroove_user_name", userName);
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "moodgroove_is_guest", "false");
+        
+        StateHasChanged();
+    }
+
+    private async Task ContinueAsGuest()
+    {
+        isLoggedIn = true;
+        userName = "Guest User";
+        userProfileImage = "";
+        isGuest = true;
+        
+        // Store guest state
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "moodgroove_logged_in", "true");
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "moodgroove_user_name", userName);
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "moodgroove_is_guest", "true");
+        
+        StateHasChanged();
+    }
+
+    private async Task Logout()
+    {
+        isLoggedIn = false;
+        userName = string.Empty;
+        userProfileImage = string.Empty;
+        isGuest = false;
+        
+        // Clear stored login state
+        await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "moodgroove_logged_in");
+        await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "moodgroove_user_name");
+        await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "moodgroove_is_guest");
+        await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "moodgroove_profile_image");
+        
+        StateHasChanged();
+    }
+
+    private async Task CheckLoginStatus()
+    {
+        try
+        {
+            var loggedIn = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "moodgroove_logged_in");
+            var storedUserName = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "moodgroove_user_name");
+            var storedIsGuest = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "moodgroove_is_guest");
+            var storedProfileImage = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "moodgroove_profile_image");
+            
+            if (loggedIn == "true" && !string.IsNullOrEmpty(storedUserName))
+            {
+                isLoggedIn = true;
+                userName = storedUserName;
+                isGuest = storedIsGuest == "true";
+                userProfileImage = storedProfileImage ?? string.Empty;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error checking login status: {ex.Message}");
+        }
+    }
+}
+
+<style>
+    .login-display {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 25px;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: #1db954;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .profile-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .default-avatar {
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .username {
+        color: rgba(255, 255, 255, 0.95);
+        font-weight: 600;
+        font-size: 0.9rem;
+        line-height: 1.2;
+    }
+
+    .spotify-status {
+        color: #1db954;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+
+    .btn-logout {
+        background: transparent;
+        border: none;
+        color: rgba(255, 255, 255, 0.7);
+        padding: 0.25rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+    }
+
+    .btn-logout:hover {
+        color: #ff4757;
+        background: rgba(255, 71, 87, 0.1);
+    }
+
+    .login-options {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 20px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-spotify {
+        background: #1db954;
+        color: white;
+        box-shadow: 0 2px 8px rgba(29, 185, 84, 0.3);
+    }
+
+    .btn-spotify:hover {
+        background: #1ed760;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(29, 185, 84, 0.4);
+    }
+
+    .btn-guest {
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-guest:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-1px);
+    }
+
+    .bi {
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+        .login-options {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .btn {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+
+        .user-details {
+            display: none;
+        }
+
+        .user-info {
+            padding: 0.4rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .btn-guest {
+            display: none;
+        }
+    }
+</style>

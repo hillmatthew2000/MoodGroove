@@ -1,0 +1,215 @@
+@page "/"
+@using Microsoft.AspNetCore.Components.Web
+
+<PageTitle>MoodGroove - Your Mood, Your Music</PageTitle>
+
+<div class="hero-section">
+    <div class="hero-content">
+        <h1>🎵 Welcome to MoodGroove</h1>
+        <p class="hero-subtitle">Let your feelings guide the soundtrack of your day</p>
+        <p class="hero-description">
+            Whether you're excited, mellow, happy, or blue, just select your mood and instantly get a playlist 
+            that matches your vibe and preferred genres.
+        </p>
+        
+        <div class="action-buttons">
+            <a href="/mood-selection" class="btn btn-primary btn-lg">
+                <span class="bi bi-emoji-smile"></span>
+                Start with Your Mood
+            </a>
+            <a href="/genres" class="btn btn-secondary btn-lg">
+                <span class="bi bi-music-note-list"></span>
+                Set Your Genres
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="features-section">
+    <div class="container">
+        <h2>✨ Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎭</div>
+                <h3>Mood-Based Playlists</h3>
+                <p>Instantly receive Spotify playlists that align with your current mood.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🎼</div>
+                <h3>Genre Customization</h3>
+                <p>Choose your favorite genres for even more personalized recommendations.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔗</div>
+                <h3>Spotify Integration</h3>
+                <p>Directly stream full tracks using your own Spotify account.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">💫</div>
+                <h3>Sleek UI</h3>
+                <p>An intuitive interface designed for quick mood-to-music journeys.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hero-section {
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 2rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        margin: 2rem 0;
+    }
+
+    .hero-content h1 {
+        font-size: 3rem;
+        color: #1db954;
+        margin-bottom: 1rem;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 1rem;
+        font-weight: 300;
+    }
+
+    .hero-description {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.8);
+        max-width: 600px;
+        margin: 0 auto 2rem auto;
+        line-height: 1.6;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 15px 30px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(45deg, #1db954, #1ed760);
+        color: white;
+        border: none;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.4);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.6);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-3px);
+    }
+
+    .features-section {
+        padding: 3rem 0;
+    }
+
+    .features-section h2 {
+        text-align: center;
+        color: #1db954;
+        font-size: 2.5rem;
+        margin-bottom: 3rem;
+        font-weight: 700;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .feature-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .feature-card h3 {
+        color: #1db954;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+        font-weight: 600;
+    }
+
+    .feature-card p {
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .hero-content h1 {
+            font-size: 2rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn {
+            width: 100%;
+            max-width: 300px;
+        }
+    }
+</style>

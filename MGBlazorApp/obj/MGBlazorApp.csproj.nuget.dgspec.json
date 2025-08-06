@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\MoodGroove\\MoodGroove\\MGBlazorApp\\MGBlazorApp.csproj": {}
+    "C:\\MoodGroove\\MoodGroove\\mgblazorapp\\MGBlazorApp.csproj": {}
   },
   "projects": {
-    "C:\\MoodGroove\\MoodGroove\\MGBlazorApp\\MGBlazorApp.csproj": {
+    "C:\\MoodGroove\\MoodGroove\\mgblazorapp\\MGBlazorApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\MoodGroove\\MoodGroove\\MGBlazorApp\\MGBlazorApp.csproj",
+        "projectUniqueName": "C:\\MoodGroove\\MoodGroove\\mgblazorapp\\MGBlazorApp.csproj",
         "projectName": "MGBlazorApp",
-        "projectPath": "C:\\MoodGroove\\MoodGroove\\MGBlazorApp\\MGBlazorApp.csproj",
+        "projectPath": "C:\\MoodGroove\\MoodGroove\\mgblazorapp\\MGBlazorApp.csproj",
         "packagesPath": "C:\\Users\\hillm\\.nuget\\packages\\",
-        "outputPath": "C:\\MoodGroove\\MoodGroove\\MGBlazorApp\\obj\\",
+        "outputPath": "C:\\MoodGroove\\MoodGroove\\mgblazorapp\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
