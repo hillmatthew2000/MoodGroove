@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "yzT4M3XaORs=",
+  "dgSpecHash": "C3ugVTxrrcY=",
   "success": true,
-  "projectFilePath": "C:\\MoodGroove\\MoodGroove\\mgblazorapp\\MGBlazorApp.csproj",
+  "projectFilePath": "C:\\MoodGroove\\MoodGroove\\MGBlazorApp\\MGBlazorApp.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\hillm\\.nuget\\packages\\microsoft.aspnetcore.authorization\\9.0.7\\microsoft.aspnetcore.authorization.9.0.7.nupkg.sha512",
     "C:\\Users\\hillm\\.nuget\\packages\\microsoft.aspnetcore.components\\9.0.7\\microsoft.aspnetcore.components.9.0.7.nupkg.sha512",
