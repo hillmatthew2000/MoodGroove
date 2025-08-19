@@ -8,29 +8,40 @@ namespace MGBlazorApp.Services
     public class SpotifyService
     {
         private readonly HttpClient _httpClient;
-        private readonly IConfiguration _configuration;
+        private readonly AppConfigurationService _configService;
         private readonly IJSRuntime _jsRuntime;
         
         // PKCE values stored for the session
         private string? _codeVerifier;
         private string? _state;
         
-        public SpotifyService(HttpClient httpClient, IConfiguration configuration, IJSRuntime jsRuntime)
+        public SpotifyService(HttpClient httpClient, AppConfigurationService configService, IJSRuntime jsRuntime)
         {
             _httpClient = httpClient;
-            _configuration = configuration;
+            _configService = configService;
             _jsRuntime = jsRuntime;
         }
         
         public async Task<string> GetAuthorizationUrlAsync()
         {
-            var clientId = _configuration["Spotify:ClientId"];
-            var redirectUri = _configuration["Spotify:RedirectUri"];
-            var scope = "user-read-private user-read-email playlist-read-private playlist-modify-public playlist-modify-private user-read-playback-state user-modify-playbook-state streaming";
+            var config = await _configService.GetSpotifyConfigAsync();
+            var clientId = config.ClientId;
+            var redirectUri = config.RedirectUri;
+            var scope = "user-read-private user-read-email playlist-read-private playlist-modify-public playlist-modify-private";
             
-            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(redirectUri))
+            // Debug logging
+            Console.WriteLine($"Debug: ClientId = '{clientId}'");
+            Console.WriteLine($"Debug: RedirectUri = '{redirectUri}'");
+            Console.WriteLine($"Debug: Full auth URL will be generated with these parameters");
+            
+            if (string.IsNullOrEmpty(clientId))
             {
-                throw new InvalidOperationException("Spotify ClientId and RedirectUri must be configured");
+                throw new InvalidOperationException("Error configure spotify client id");
+            }
+            
+            if (string.IsNullOrEmpty(redirectUri))
+            {
+                throw new InvalidOperationException("Error configure spotify redirect uri");
             }
             
             // Generate PKCE values
@@ -42,7 +53,7 @@ namespace MGBlazorApp.Services
             await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "spotify_code_verifier", _codeVerifier);
             await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "spotify_state", _state);
             
-            return $"https://accounts.spotify.com/authorize?" +
+            var authUrl = $"https://accounts.spotify.com/authorize?" +
                    $"client_id={clientId}&" +
                    $"response_type=code&" +
                    $"redirect_uri={Uri.EscapeDataString(redirectUri)}&" +
@@ -50,6 +61,10 @@ namespace MGBlazorApp.Services
                    $"state={_state}&" +
                    $"code_challenge_method=S256&" +
                    $"code_challenge={codeChallenge}";
+            
+            Console.WriteLine($"Debug: Generated auth URL: {authUrl}");
+            
+            return authUrl;
         }
         
         public async Task<SpotifyTokenResponse?> ExchangeCodeForTokenAsync(string code, string state)
@@ -71,8 +86,9 @@ namespace MGBlazorApp.Services
                     throw new InvalidOperationException("Code verifier not found");
                 }
                 
-                var clientId = _configuration["Spotify:ClientId"];
-                var redirectUri = _configuration["Spotify:RedirectUri"];
+                var config = await _configService.GetSpotifyConfigAsync();
+                var clientId = config.ClientId;
+                var redirectUri = config.RedirectUri;
                 
                 if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(redirectUri))
                 {
@@ -183,7 +199,8 @@ namespace MGBlazorApp.Services
                     return null;
                 }
                 
-                var clientId = _configuration["Spotify:ClientId"];
+                var config = await _configService.GetSpotifyConfigAsync();
+                var clientId = config.ClientId;
                 
                 if (string.IsNullOrEmpty(clientId))
                 {

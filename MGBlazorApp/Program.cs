@@ -8,14 +8,24 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+builder.Services.AddScoped<AppConfigurationService>();
 builder.Services.AddScoped<SpotifyService>();
 builder.Services.AddSingleton<AuthenticationStateService>();
 
-var app = builder.Build();
+try
+{
+    var app = builder.Build();
 
-// Initialize the authentication state service with the spotify service
-var authService = app.Services.GetRequiredService<AuthenticationStateService>();
-var spotifyService = app.Services.GetRequiredService<SpotifyService>();
-authService.SetSpotifyService(spotifyService);
+    // Initialize the authentication state service with the spotify service
+    var authService = app.Services.GetRequiredService<AuthenticationStateService>();
+    var spotifyService = app.Services.GetRequiredService<SpotifyService>();
+    authService.SetSpotifyService(spotifyService);
 
-await app.RunAsync();
+    await app.RunAsync();
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Application startup error: {ex.Message}");
+    Console.WriteLine($"Stack trace: {ex.StackTrace}");
+    throw;
+}
