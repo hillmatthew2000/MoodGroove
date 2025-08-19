@@ -1,17 +1,146 @@
 \MGBlazorApp\Shared\LoginDisplay.razor
+@using MGBlazorApp.Services
+@inject SpotifyService SpotifyService
+@inject AuthenticationStateService AuthState
+@inject NavigationManager Navigation
+@implements IDisposable
+
 <div class="login-display">
-    <div class="login-options">
-        <button class="groovy-btn spotify-btn" onclick="alert('🎵 Spotify connection coming soon!')">
-            <div class="btn-icon">🎵</div>
-            <span>Connect Spotify</span>
-            <div class="btn-glow"></div>
-        </button>
-        
-        <button class="groovy-btn guest-btn" onclick="alert('👤 Welcome, groove as a guest!')">
-            <div class="btn-icon">👤</div>
-            <span>Guest Groove</span>
-            <div class="btn-glow"></div>
-        </button>
-    </div>
+    @if (AuthState.IsAuthenticated && AuthState.CurrentUser != null)
+    {
+        <div class="user-profile">
+            <div class="user-avatar">
+                @if (AuthState.CurrentUser.Images?.Length > 0)
+                {
+                    <img src="@AuthState.CurrentUser.Images[0].Url" alt="Profile" class="profile-image" />
+                }
+                else
+                {
+                    <div class="default-avatar">@GetInitials(AuthState.CurrentUser.DisplayName)</div>
+                }
+            </div>
+            <div class="user-details">
+                <div class="username">@AuthState.CurrentUser.DisplayName</div>
+                <div class="spotify-status">Connected to Spotify</div>
+            </div>
+            <button class="groovy-btn logout-btn" @onclick="Logout" disabled="@isLoggingOut">
+                <div class="btn-icon">@(isLoggingOut ? "⏳" : "🚪")</div>
+                <span>@(isLoggingOut ? "Logging out..." : "Logout")</span>
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="login-options">
+            <button class="groovy-btn spotify-btn" @onclick="ConnectSpotify" disabled="@isConnecting">
+                <div class="btn-icon">@(isConnecting ? "⏳" : "🎵")</div>
+                <span>@(isConnecting ? "Connecting..." : "Connect Spotify")</span>
+                <div class="btn-glow"></div>
+            </button>
+            
+            <button class="groovy-btn guest-btn" @onclick="GuestMode">
+                <div class="btn-icon">👤</div>
+                <span>Guest Groove</span>
+                <div class="btn-glow"></div>
+            </button>
+            
+            @if (!string.IsNullOrEmpty(debugMessage))
+            {
+                <div class="debug-message">
+                    @debugMessage
+                </div>
+            }
+        </div>
+    }
 </div>
+
+@code {
+    private bool isConnecting = false;
+    private bool isLoggingOut = false;
+    private string debugMessage = "";
+    
+    protected override async Task OnInitializedAsync()
+    {
+        AuthState.OnAuthenticationStateChanged += StateHasChanged;
+        
+        // Initialize authentication state on component load
+        await AuthState.InitializeAsync();
+    }
+    
+    private async Task ConnectSpotify()
+    {
+        if (isConnecting) return;
+        
+        try
+        {
+            isConnecting = true;
+            debugMessage = "Starting connection...";
+            StateHasChanged();
+            
+            Console.WriteLine("ConnectSpotify: Starting authentication flow...");
+            
+            var authUrl = await SpotifyService.GetAuthorizationUrlAsync();
+            Console.WriteLine($"ConnectSpotify: Generated auth URL: {authUrl}");
+            
+            debugMessage = $"Redirecting to: {authUrl.Substring(0, Math.Min(50, authUrl.Length))}...";
+            StateHasChanged();
+            
+            await Task.Delay(1000); // Let user see the debug message
+            
+            Navigation.NavigateTo(authUrl, true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ConnectSpotify: Error - {ex.Message}");
+            Console.WriteLine($"ConnectSpotify: Stack trace - {ex.StackTrace}");
+            
+            debugMessage = $"Error: {ex.Message}";
+            isConnecting = false;
+            StateHasChanged();
+        }
+    }
+    
+    private void GuestMode()
+    {
+        // Handle guest mode logic
+        Navigation.NavigateTo("/");
+    }
+    
+    private async Task Logout()
+    {
+        if (isLoggingOut) return;
+        
+        try
+        {
+            isLoggingOut = true;
+            StateHasChanged();
+            
+            await AuthState.LogoutAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error during logout: {ex.Message}");
+        }
+        finally
+        {
+            isLoggingOut = false;
+            StateHasChanged();
+        }
+    }
+    
+    private string GetInitials(string? displayName)
+    {
+        if (string.IsNullOrEmpty(displayName)) return "U";
+        
+        var parts = displayName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2)
+            return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+        return displayName[0].ToString().ToUpper();
+    }
+    
+    public void Dispose()
+    {
+        AuthState.OnAuthenticationStateChanged -= StateHasChanged;
+    }
+}
 

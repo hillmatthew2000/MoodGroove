@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "C3ugVTxrrcY=",
+  "dgSpecHash": "KV7dYkc48yA=",
   "success": true,
   "projectFilePath": "C:\\MoodGroove\\MoodGroove\\MGBlazorApp\\MGBlazorApp.csproj",
   "expectedPackageFiles": [
@@ -12,6 +12,7 @@
     "C:\\Users\\hillm\\.nuget\\packages\\microsoft.aspnetcore.components.webassembly\\9.0.7\\microsoft.aspnetcore.components.webassembly.9.0.7.nupkg.sha512",
     "C:\\Users\\hillm\\.nuget\\packages\\microsoft.aspnetcore.components.webassembly.devserver\\9.0.7\\microsoft.aspnetcore.components.webassembly.devserver.9.0.7.nupkg.sha512",
     "C:\\Users\\hillm\\.nuget\\packages\\microsoft.aspnetcore.metadata\\9.0.7\\microsoft.aspnetcore.metadata.9.0.7.nupkg.sha512",
+    "C:\\Users\\hillm\\.nuget\\packages\\microsoft.aspnetcore.webutilities\\9.0.0\\microsoft.aspnetcore.webutilities.9.0.0.nupkg.sha512",
     "C:\\Users\\hillm\\.nuget\\packages\\microsoft.extensions.configuration\\9.0.7\\microsoft.extensions.configuration.9.0.7.nupkg.sha512",
     "C:\\Users\\hillm\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\9.0.7\\microsoft.extensions.configuration.abstractions.9.0.7.nupkg.sha512",
     "C:\\Users\\hillm\\.nuget\\packages\\microsoft.extensions.configuration.binder\\9.0.7\\microsoft.extensions.configuration.binder.9.0.7.nupkg.sha512",
@@ -28,8 +29,10 @@
     "C:\\Users\\hillm\\.nuget\\packages\\microsoft.extensions.primitives\\9.0.7\\microsoft.extensions.primitives.9.0.7.nupkg.sha512",
     "C:\\Users\\hillm\\.nuget\\packages\\microsoft.jsinterop\\9.0.7\\microsoft.jsinterop.9.0.7.nupkg.sha512",
     "C:\\Users\\hillm\\.nuget\\packages\\microsoft.jsinterop.webassembly\\9.0.7\\microsoft.jsinterop.webassembly.9.0.7.nupkg.sha512",
+    "C:\\Users\\hillm\\.nuget\\packages\\microsoft.net.http.headers\\9.0.0\\microsoft.net.http.headers.9.0.0.nupkg.sha512",
     "C:\\Users\\hillm\\.nuget\\packages\\microsoft.net.illink.tasks\\9.0.7\\microsoft.net.illink.tasks.9.0.7.nupkg.sha512",
     "C:\\Users\\hillm\\.nuget\\packages\\microsoft.net.sdk.webassembly.pack\\9.0.7\\microsoft.net.sdk.webassembly.pack.9.0.7.nupkg.sha512",
+    "C:\\Users\\hillm\\.nuget\\packages\\system.text.json\\9.0.0\\system.text.json.9.0.0.nupkg.sha512",
     "C:\\Users\\hillm\\.nuget\\packages\\microsoft.netcore.app.runtime.mono.browser-wasm\\9.0.7\\microsoft.netcore.app.runtime.mono.browser-wasm.9.0.7.nupkg.sha512"
   ],
   "logs": []
