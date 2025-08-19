@@ -1,0 +1,147 @@
+@page "/spotify-callback"
+@using MGBlazorApp.Services
+@inject SpotifyService SpotifyService
+@inject AuthenticationStateService AuthState
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<div class="callback-container">
+    <div class="loading-spinner">
+        <div class="equalizer">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+        <h3>🎵 Connecting to Spotify...</h3>
+        @if (!string.IsNullOrEmpty(statusMessage))
+        {
+            <p class="status-message">@statusMessage</p>
+        }
+    </div>
+</div>
+
+@code {
+    private string statusMessage = "";
+    
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            statusMessage = "Processing authentication...";
+            StateHasChanged();
+            
+            var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+            var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+            
+            if (query.TryGetValue("code", out var code) && query.TryGetValue("state", out var state))
+            {
+                statusMessage = "Exchanging authorization code for access token...";
+                StateHasChanged();
+                
+                var tokenResponse = await SpotifyService.ExchangeCodeForTokenAsync(code.ToString(), state.ToString());
+                
+                if (tokenResponse?.AccessToken != null)
+                {
+                    statusMessage = "Getting your profile information...";
+                    StateHasChanged();
+                    
+                    var userProfile = await SpotifyService.GetUserProfileAsync(tokenResponse.AccessToken);
+                    
+                    if (userProfile != null)
+                    {
+                        AuthState.SetAuthenticatedUser(userProfile);
+                        
+                        statusMessage = $"Welcome to MoodGroove, {userProfile.DisplayName}!";
+                        StateHasChanged();
+                        
+                        // Wait a moment to show the welcome message
+                        await Task.Delay(1500);
+                        
+                        Navigation.NavigateTo("/");
+                        return;
+                    }
+                }
+                
+                throw new Exception("Failed to get user profile");
+            }
+            else if (query.TryGetValue("error", out var error))
+            {
+                var errorDescription = query.TryGetValue("error_description", out var desc) ? desc.ToString() : "";
+                throw new Exception($"Spotify authentication error: {error} - {errorDescription}");
+            }
+            else
+            {
+                throw new Exception("Invalid callback - missing required parameters");
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"❌ Authentication failed: {ex.Message}";
+            StateHasChanged();
+            
+            // Wait a moment to show the error, then redirect
+            await Task.Delay(3000);
+            Navigation.NavigateTo("/");
+        }
+    }
+}
+
+<style>
+.callback-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+}
+
+.loading-spinner {
+    text-align: center;
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+}
+
+.loading-spinner h3 {
+    margin: 2rem 0 1rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.status-message {
+    margin-top: 1rem;
+    font-size: 1rem;
+    opacity: 0.9;
+    line-height: 1.4;
+}
+
+.equalizer {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 4px;
+    height: 50px;
+    margin-bottom: 1rem;
+}
+
+.bar {
+    width: 8px;
+    background: linear-gradient(45deg, #1db954, #1ed760);
+    border-radius: 4px;
+    animation: equalizer 1.5s ease-in-out infinite;
+}
+
+.bar:nth-child(1) { animation-delay: 0s; }
+.bar:nth-child(2) { animation-delay: 0.1s; }
+.bar:nth-child(3) { animation-delay: 0.2s; }
+.bar:nth-child(4) { animation-delay: 0.3s; }
+.bar:nth-child(5) { animation-delay: 0.4s; }
+</style>
