@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Microsoft.JSInterop;
+using Microsoft.AspNetCore.Components;
 
 namespace MGBlazorApp.Services
 {
@@ -9,30 +10,68 @@ namespace MGBlazorApp.Services
     {
         private readonly HttpClient _httpClient;
         private readonly AppConfigurationService _configService;
-        private readonly IJSRuntime _jsRuntime;
+    private readonly IJSRuntime _jsRuntime;
+    private readonly NavigationManager _navigation;
         
         // PKCE values stored for the session
         private string? _codeVerifier;
         private string? _state;
         
-        public SpotifyService(HttpClient httpClient, AppConfigurationService configService, IJSRuntime jsRuntime)
+        public SpotifyService(HttpClient httpClient, AppConfigurationService configService, IJSRuntime jsRuntime, NavigationManager navigation)
         {
             _httpClient = httpClient;
             _configService = configService;
             _jsRuntime = jsRuntime;
+            _navigation = navigation;
+        }
+        
+    private string BuildRedirectUri(string? configured)
+        {
+            // If configured value present use trimmed version, otherwise build from current base URI
+            if (!string.IsNullOrWhiteSpace(configured))
+            {
+        var val = configured.Trim();
+        // If user set https://localhost and config flag asks to downgrade for testing
+        if (val.StartsWith("https://localhost", StringComparison.OrdinalIgnoreCase) && _lastLoadedConfig?.UseHttpRedirect == true)
+        {
+            val = val.Replace("https://localhost", "http://localhost");
+        }
+        return val;
+            }
+            var baseUri = _navigation.BaseUri; // ends with '/'
+            if (!baseUri.EndsWith('/')) baseUri += "/";
+            return baseUri + "spotify-callback"; // yields e.g. https://localhost:7267/spotify-callback
+        }
+    private SpotifyConfig? _lastLoadedConfig;
+
+        // Public helper for diagnostics
+        public async Task<(string ClientId, string RedirectUri, string Origin)> GetAuthConfigSnapshotAsync()
+        {
+            var config = await _configService.GetSpotifyConfigAsync();
+            var redirect = BuildRedirectUri(config.RedirectUri);
+            var origin = _navigation.BaseUri;
+            return (config.ClientId, redirect, origin);
         }
         
         public async Task<string> GetAuthorizationUrlAsync()
         {
             var config = await _configService.GetSpotifyConfigAsync();
+            _lastLoadedConfig = config;            
             var clientId = config.ClientId;
-            var redirectUri = config.RedirectUri;
+            var redirectUri = BuildRedirectUri(config.RedirectUri);
             var scope = "user-read-private user-read-email playlist-read-private playlist-modify-public playlist-modify-private";
             
             // Debug logging
             Console.WriteLine($"Debug: ClientId = '{clientId}'");
             Console.WriteLine($"Debug: RedirectUri = '{redirectUri}'");
             Console.WriteLine($"Debug: Full auth URL will be generated with these parameters");
+            Console.WriteLine($"Debug: RedirectUri Length = {redirectUri?.Length}");
+            if (!string.IsNullOrEmpty(redirectUri))
+            {
+                var escaped = Uri.EscapeDataString(redirectUri);
+                Console.WriteLine($"Debug: Escaped RedirectUri = '{escaped}' Length={escaped.Length}");
+                Console.WriteLine("Debug: RedirectUri Hex Bytes: " + string.Join(" ", Encoding.UTF8.GetBytes(redirectUri).Select(b => b.ToString("X2"))));
+            }
             
             if (string.IsNullOrEmpty(clientId))
             {
@@ -87,8 +126,9 @@ namespace MGBlazorApp.Services
                 }
                 
                 var config = await _configService.GetSpotifyConfigAsync();
+                _lastLoadedConfig = config;
                 var clientId = config.ClientId;
-                var redirectUri = config.RedirectUri;
+                var redirectUri = BuildRedirectUri(config.RedirectUri);
                 
                 if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(redirectUri))
                 {

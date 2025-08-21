@@ -25,6 +25,13 @@ namespace MGBlazorApp.Services
                     });
                     
                     _spotifyConfig = config?.Spotify ?? new SpotifyConfig();
+
+                    // Normalize / trim to avoid hidden whitespace issues that can cause Spotify redirect URI mismatch
+                    if (_spotifyConfig != null)
+                    {
+                        _spotifyConfig.ClientId = _spotifyConfig.ClientId?.Trim() ?? string.Empty;
+                        _spotifyConfig.RedirectUri = _spotifyConfig.RedirectUri?.Trim() ?? string.Empty;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -35,10 +42,12 @@ namespace MGBlazorApp.Services
                         ClientId = "4a8fb4093f1349b1a23ea4728013b6c3",
                         RedirectUri = "https://localhost:7267/spotify-callback"
                     };
+                    _spotifyConfig.ClientId = _spotifyConfig.ClientId.Trim();
+                    _spotifyConfig.RedirectUri = _spotifyConfig.RedirectUri.Trim();
                 }
             }
             
-            return _spotifyConfig;
+            return _spotifyConfig!; // ensured not null by initialization logic above
         }
     }
     
@@ -51,5 +60,7 @@ namespace MGBlazorApp.Services
     {
         public string ClientId { get; set; } = "";
         public string RedirectUri { get; set; } = "";
+    // Development helper: if true and RedirectUri is https://localhost, force http for troubleshooting
+    public bool UseHttpRedirect { get; set; } = false;
     }
 }

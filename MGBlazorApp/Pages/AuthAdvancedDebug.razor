@@ -1,0 +1,151 @@
+@page "/auth-advanced"
+@using MGBlazorApp.Services
+@using Microsoft.JSInterop
+@using System.Security.Cryptography
+@using System.Text
+@inject SpotifyService Spotify
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<h3>Spotify Advanced Auth Debug</h3>
+
+@if(!_loaded)
+{
+    <p>Loading base configuration...</p>
+}
+else if(!string.IsNullOrEmpty(_error))
+{
+    <p style="color:red">@_error</p>
+}
+else
+{
+    <p><strong>Base ClientId:</strong> @_clientId</p>
+    <p><strong>Primary Redirect:</strong> @_redirect</p>
+    <p><strong>Origin:</strong> @_origin</p>
+
+    <h4>Test Variants</h4>
+    <table class="table table-sm">
+        <thead><tr><th>Name</th><th>Description</th><th>Action</th></tr></thead>
+        <tbody>
+            <tr>
+                <td>Full (App)</td>
+                <td>Current app scopes + PKCE</td>
+                <td><button class="btn btn-primary btn-sm" @onclick="() => Open(_fullUrl)">Open</button></td>
+            </tr>
+            <tr>
+                <td>Minimal Scope</td>
+                <td>Only user-read-email scope</td>
+                <td><button class="btn btn-secondary btn-sm" @onclick="() => Open(_minimalUrl)">Open</button></td>
+            </tr>
+            <tr>
+                <td>Empty Scope</td>
+                <td>No scope parameter</td>
+                <td><button class="btn btn-secondary btn-sm" @onclick="() => Open(_emptyScopeUrl)">Open</button></td>
+            </tr>
+            <tr>
+                <td>Redirect First Ordering</td>
+                <td>redirect_uri placed first in query string</td>
+                <td><button class="btn btn-secondary btn-sm" @onclick="() => Open(_redirectFirstUrl)">Open</button></td>
+            </tr>
+            <tr>
+                <td>127.0.0.1 Host</td>
+                <td>Loopback IP instead of localhost (requires adding redirect in dashboard)</td>
+                <td><button class="btn btn-secondary btn-sm" @onclick="() => Open(_loopbackUrl)">Open</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>Generated URLs</h4>
+    <textarea style="width:100%;height:200px" readonly>
+FULL: @_fullUrl
+MIN : @_minimalUrl
+EMPTY: @_emptyScopeUrl
+REDIR-FIRST: @_redirectFirstUrl
+LOOPBACK: @_loopbackUrl
+    </textarea>
+
+    <ol>
+        <li>Add <code>@_redirect</code> (and if testing loopback: <code>@_loopbackRedirect</code>) in Spotify dashboard; Save.</li>
+        <li>Open variant in a brand new private window.</li>
+        <li>Log in / email code if prompted.</li>
+        <li>If you hit INVALID_CLIENT immediately, copy that exact error page URL.</li>
+        <li>Report which variant (if any) succeeds.</li>
+    </ol>
+}
+
+@code {
+    private bool _loaded;
+    private string _error="";
+    private string _clientId="";
+    private string _redirect="";
+    private string _origin="";
+
+    private string _fullUrl="";
+    private string _minimalUrl="";
+    private string _emptyScopeUrl="";
+    private string _redirectFirstUrl="";
+    private string _loopbackUrl="";
+    private string _loopbackRedirect="";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var snap = await Spotify.GetAuthConfigSnapshotAsync();
+            _clientId = snap.ClientId;
+            _redirect = snap.RedirectUri;
+            _origin = snap.Origin;
+
+            var codeVerifier = GenerateSimpleCodeVerifier();
+            var challenge = ToChallenge(codeVerifier);
+            var state = Guid.NewGuid().ToString();
+
+            string esc(string s) => Uri.EscapeDataString(s);
+            var fullScopes = "user-read-private user-read-email playlist-read-private playlist-modify-public playlist-modify-private";
+
+            // Base parameters builder
+            string Base(string redirect, string scopePart, bool includeScope) =>
+                $"client_id={_clientId}&response_type=code&redirect_uri={esc(redirect)}" +
+                (includeScope? $"&scope={esc(scopePart)}" : "") +
+                $"&state={state}&code_challenge_method=S256&code_challenge={challenge}";
+
+            _fullUrl = "https://accounts.spotify.com/authorize?" + Base(_redirect, fullScopes, true);
+            _minimalUrl = "https://accounts.spotify.com/authorize?" + Base(_redirect, "user-read-email", true);
+            _emptyScopeUrl = "https://accounts.spotify.com/authorize?" + Base(_redirect, string.Empty, false);
+            _redirectFirstUrl = $"https://accounts.spotify.com/authorize?redirect_uri={esc(_redirect)}&client_id={_clientId}&response_type=code&scope={esc("user-read-email")}&state={state}&code_challenge_method=S256&code_challenge={challenge}";
+
+            // Loopback variant if localhost used
+            if (_redirect.Contains("localhost"))
+            {
+                _loopbackRedirect = _redirect.Replace("localhost", "127.0.0.1");
+                _loopbackUrl = "https://accounts.spotify.com/authorize?" + Base(_loopbackRedirect, "user-read-email", true);
+            }
+            else
+            {
+                _loopbackUrl = "(redirect not localhost)";
+            }
+
+            _loaded = true;
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private void Open(string url) => Nav.NavigateTo(url, true);
+
+    // Lightweight verifier generation (not reusing service internal one to avoid overwriting active session)   
+    private static string GenerateSimpleCodeVerifier()
+    {
+        var bytes = new byte[32];
+        RandomNumberGenerator.Fill(bytes);
+        return Convert.ToBase64String(bytes).Replace('+','-').Replace('/','_').Replace("=","");
+    }
+    private static string ToChallenge(string verifier)
+    {
+        var bytes = Encoding.UTF8.GetBytes(verifier);
+        var hash = SHA256.HashData(bytes);
+        return Convert.ToBase64String(hash).Replace('+','-').Replace('/','_').Replace("=","");
+    }
+}

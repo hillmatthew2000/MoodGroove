@@ -1,0 +1,34 @@
+@page "/auth-debug"
+@using MGBlazorApp.Services
+@inject SpotifyService Spotify
+
+<h3>Spotify Auth Debug</h3>
+@if(_snapshotLoaded)
+{
+    <table class="table table-sm">
+        <tr><th>Client Id</th><td>@_clientId</td></tr>
+        <tr><th>Computed Redirect URI</th><td>@_redirect</td></tr>
+        <tr><th>Navigation BaseUri</th><td>@_origin</td></tr>
+    </table>
+    <p>Copy the <strong>Computed Redirect URI</strong> exactly into the Spotify dashboard Redirect URIs list and click Save there.</p>
+}
+else
+{
+    <p>Loading...</p>
+}
+
+@code {
+    private string _clientId = string.Empty;
+    private string _redirect = string.Empty;
+    private string _origin = string.Empty;
+    private bool _snapshotLoaded;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var snap = await Spotify.GetAuthConfigSnapshotAsync();
+        _clientId = snap.ClientId;
+        _redirect = snap.RedirectUri;
+        _origin = snap.Origin;
+        _snapshotLoaded = true;
+    }
+}

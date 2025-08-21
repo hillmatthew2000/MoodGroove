@@ -1,0 +1,56 @@
+@page "/auth-link"
+@using MGBlazorApp.Services
+@inject SpotifyService Spotify
+
+<h3>Raw Spotify Authorize URL Test</h3>
+
+@if (_loading)
+{
+    <p>Generating...</p>
+}
+else if (!string.IsNullOrEmpty(_error))
+{
+    <p style="color:red">@_error</p>
+}
+else
+{
+    <p><strong>Authorize URL:</strong></p>
+    <textarea style="width:100%;height:140px" readonly>@_authUrl</textarea>
+    <p>
+        <button class="btn btn-primary" @onclick="Open">Open in same tab</button>
+        <button class="btn btn-secondary" @onclick="OpenNew">Open in new tab</button>
+    </p>
+    <ol>
+        <li>Copy this URL and paste it into an incognito window.</li>
+        <li>Log in and (if prompted) enter the emailed code.</li>
+        <li>If you still reach INVALID_CLIENT, copy the FULL final URL and share.</li>
+    </ol>
+}
+
+@code {
+    private string _authUrl = string.Empty;
+    private bool _loading = true;
+    private string _error = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _authUrl = await Spotify.GetAuthorizationUrlAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    void Open() => NavigationManager.NavigateTo(_authUrl, forceLoad: true);
+    void OpenNew() => JS.InvokeVoidAsync("window.open", _authUrl, "_blank");
+
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+}
